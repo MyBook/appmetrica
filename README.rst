@@ -4,6 +4,11 @@ APPMETRICA
 
 Application for integrating with Yandex AppMetrica https://appmetrica.yandex.ru/
 
+.. image:: https://travis-ci.org/MyBook/appmetrica.svg?branch=master
+    :target: https://travis-ci.org/MyBook/appmetrica
+.. image:: https://codecov.io/gh/MyBook/appmetrica/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/MyBook/appmetrica
+
 Sens push
 ---------
 
@@ -15,7 +20,7 @@ Sens push
 
 3. Create `API` instance and send push::
 
-    from appmetrica.push import API
+    from appmetrica.push.api import API
 
     api = API(application_id, access_token)
 
