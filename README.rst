@@ -1,5 +1,5 @@
 ==========
-APPMETRICA
+AppMetrica
 ==========
 
 Application for integrating with Yandex AppMetrica https://appmetrica.yandex.ru/
@@ -9,7 +9,7 @@ Application for integrating with Yandex AppMetrica https://appmetrica.yandex.ru/
 .. image:: https://codecov.io/gh/MyBook/appmetrica/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/MyBook/appmetrica
 
-Sens push
+Send push
 ---------
 
 1. Get `application id` from your account in appmetrica.yandex.ru
