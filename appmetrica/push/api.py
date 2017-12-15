@@ -45,7 +45,7 @@ class API(object):
             logger.error('create_group request with json %s failed due to %s', data, exc, exc_info=True)
             raise exceptions.AppMetricaCreateGroupError
 
-        # response_data contain dict like:
+        # response_data contains dict like:
         # {
         #   "group": {
         #     "id": XXXXXX,
@@ -113,6 +113,7 @@ class API(object):
         try:
             response_data = self._request('post', 'send', json=data)
         except Exception as exc:
+            logger.error('send_push request with json %s failed due to %s', data, exc, exc_info=True)
             raise exceptions.AppMetricaSendPushError
 
         # response_data contain dict like:
@@ -140,6 +141,8 @@ class API(object):
         try:
             response_data = self._request('get', endpoint)
         except Exception as exc:
+            logger.error('check_status request for transfer_id %s failed due to %s',
+                         transfer_id, exc, exc_info=True)
             raise exceptions.AppMetricaCheckStatusError
 
         # response_data contain dict like:
