@@ -18,9 +18,12 @@ class API(object):
         self.app_id = app_id
 
     def push_tokens(self):
+        params = {
+            'application_id': self.app_id,
+            'fields': 'ios_ifa,google_aid'
+        }
         try:
-            response_data = self._request('get', 'push_tokens.json',
-                                          params={'application_id': 416934, 'fields': 'ios_ifa,google_aid'})
+            response_data = self._request('get', 'push_tokens.json', params=params)
         except exceptions.AppMetricaPrepareData:
             raise
         except Exception as exc:
