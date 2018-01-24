@@ -4,6 +4,7 @@ import logging
 import requests
 import datetime
 from appmetrica.push import exceptions
+from appmetrica.exceptions import AppMetricaRequestError
 
 logger = logging.getLogger(__name__)
 
@@ -182,14 +183,14 @@ class API(object):
                          method, url, headers, params, json, exc,
                          exc_info=True,
                          extra={'data': {'json': json, 'params': params}})
-            raise exceptions.AppMetricaRequestError
+            raise AppMetricaRequestError
 
         try:
             response_data = response.json()
         except Exception as exc:
             logger.warning('unable to parse json response due to %s', exc, exc_info=True,
                            extra={'data': {'content': response.content}})
-            raise exceptions.AppMetricaRequestError
+            raise AppMetricaRequestError
 
         return response_data
 
