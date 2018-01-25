@@ -18,6 +18,11 @@ class API(object):
         self.app_id = app_id
 
     def push_tokens(self, *fields):
+        """
+        Download all push tokens registered in the application
+        :param fields: list of requested fields
+        :return: list of push tokens
+        """
         params = {
             'application_id': self.app_id,
             'fields': ','.join(fields)
@@ -30,7 +35,18 @@ class API(object):
             logger.error('push_tokens request failed due to %s', exc, exc_info=True)
             raise exceptions.AppMetricaExportPushTokenError
 
-        return response_data
+        # response_data contains dict like:
+        # {
+        #   "data": [
+        #     {
+        #       "token": '85059BF7C6A07F7088FA75189BE045AAE9A584ACB80840A8622A8913C2ED7B40'
+        #     },
+        #     {
+        #       "token": 'EAA690AF9A76D843A2DE6837ECC352DEED2783C7BC2C510934583B13996A1B04'
+        #     }
+        #   ]
+        # }
+        return response_data['data']
 
     def _request(self, method, endpoint, params=None, headers=None):
         params = params or {}

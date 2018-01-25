@@ -7,4 +7,5 @@ class AppMetricaExportPushTokenError(AppMetricaException):
 
 
 class AppMetricaPrepareData(AppMetricaException):
+    """Raised when yandex export api responds that the request is queued for processing"""
     pass
