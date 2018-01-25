@@ -37,6 +37,7 @@ def test_get_push_tokens_success(export_api):
     {'status': 500},
     {'body': ConnectionError()},
 ])
+@responses.activate
 def test_get_push_tokens_error(params, export_api):
     responses.add(responses.GET, ExportAPI.base_url + 'push_tokens.json', **params)
     with pytest.raises(AppMetricaExportPushTokenError):
