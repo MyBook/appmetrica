@@ -11,7 +11,7 @@ Yandex Docs https://tech.yandex.ru/appmetrica/doc/mobile-api/push/use-cases-docp
 .. image:: https://codecov.io/gh/MyBook/appmetrica/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/MyBook/appmetrica
 
-Before using api it is necessary:
+Before using API it is necessary:
 
 1. Get `application id` from your account in appmetrica.yandex.ru
 
