@@ -28,9 +28,9 @@ def test_get_push_tokens_success(export_api):
         ]
     }
     responses.replace(responses.GET, url, status=200, json=data)
-    resp = export_api.push_tokens('token')
-    assert len(resp['data']) == 2
-    assert resp['data'][0]['token'] == 'D7BB4C4F8B3CF81488DEAAC8ABC1B955'
+    data = export_api.push_tokens('token')
+    assert len(data) == 2
+    assert data[0]['token'] == 'D7BB4C4F8B3CF81488DEAAC8ABC1B955'
 
 
 @pytest.mark.parametrize('params', [
