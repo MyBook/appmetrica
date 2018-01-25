@@ -17,10 +17,10 @@ class API(object):
         self.access_token = access_token
         self.app_id = app_id
 
-    def push_tokens(self):
+    def push_tokens(self, *fields):
         params = {
             'application_id': self.app_id,
-            'fields': 'ios_ifa,google_aid'
+            'fields': ','.join(fields)
         }
         try:
             response_data = self._request('get', 'push_tokens.json', params=params)
