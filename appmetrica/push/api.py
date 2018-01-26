@@ -1,10 +1,9 @@
 # coding: utf-8
 import json
 import logging
-import requests
 import datetime
+from appmetrica.base import BaseAPI
 from appmetrica.push import exceptions
-from appmetrica.exceptions import AppMetricaRequestError
 
 logger = logging.getLogger(__name__)
 
@@ -17,15 +16,8 @@ class TokenTypes(object):
     IOS_PUSH_TOKEN = 'ios_push_token'
 
 
-class API(object):
+class API(BaseAPI):
     base_url = 'https://push.api.appmetrica.yandex.net/push/v1/'
-    request_timeout = 5
-    access_token = None
-    app_id = None
-
-    def __init__(self, app_id, access_token):
-        self.access_token = access_token
-        self.app_id = app_id
 
     def create_group(self, name):
         """
@@ -165,34 +157,6 @@ class API(object):
                 raise exceptions.AppMetricaCheckStatusError(errors[0])
 
         return response_data['transfer']['status']
-
-    def _request(self, method, endpoint, params=None, headers=None, json=None):
-        params = params or {}
-        headers = headers or {}
-        headers.setdefault('Content-Type', 'application/json')
-        headers.setdefault('Authorization',
-                           'OAuth {access_token}'.format(access_token=self.access_token))
-
-        url = '{base_url}/{endpoint}'.format(base_url=self.base_url.rstrip('/'), endpoint=endpoint)
-
-        try:
-            response = requests.request(method, url, params=params, json=json,
-                                        headers=headers, timeout=self.request_timeout)
-        except Exception as exc:
-            logger.error('failed to request %s %s with headers=%s, params=%s json=%s due to %s',
-                         method, url, headers, params, json, exc,
-                         exc_info=True,
-                         extra={'data': {'json': json, 'params': params}})
-            raise AppMetricaRequestError
-
-        try:
-            response_data = response.json()
-        except Exception as exc:
-            logger.warning('unable to parse json response due to %s', exc, exc_info=True,
-                           extra={'data': {'content': response.content}})
-            raise AppMetricaRequestError
-
-        return response_data
 
     @staticmethod
     def build_ios_message(**kwargs):
