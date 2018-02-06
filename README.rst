@@ -11,24 +11,26 @@ Yandex Docs https://tech.yandex.ru/appmetrica/doc/mobile-api/push/use-cases-docp
 .. image:: https://codecov.io/gh/MyBook/appmetrica/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/MyBook/appmetrica
 
-Send push
----------
+Before using API it is necessary:
 
 1. Get `application id` from your account in appmetrica.yandex.ru
 
-2. `Generate access token<https://tech.yandex.ru/appmetrica/doc/mobile-api/intro/authorization-docpage/>`_
+2. [Generate access token](https://tech.yandex.ru/appmetrica/doc/mobile-api/intro/authorization-docpage/)
 
-3. Create `API` instance and send push::
+Send push
+---------
+
+1. Create `API` instance::
 
     from appmetrica.push.api import API
 
     api = API(application_id, access_token)
 
-4. Create group to combine the sending in the report::
+2. Create group to combine the sending in the report::
 
     group_id = api.create_group('test-push-1')
 
-5. Pass `group_id`, `device list` and `message` to send_push method and call::
+3. Pass `group_id`, `device list` and `message` to send_push method and call::
 
     from appmetrica.push.api import TokenTypes
 
@@ -63,6 +65,20 @@ Send push
             }
         }
 
-6. To check status of push call `check_status` method::
+4. To check status of push call `check_status` method::
 
     status = api.check_status(transfer_id)
+
+
+Export tokens
+-------------
+
+1. Create `API` instance::
+
+    from appmetrica.export.api import API
+
+    api = API(application_id, access_token)
+
+2. Call push_tokens method with necessary fields::
+
+    data = api.export_push_tokens('token', 'ios_ifa', 'google_aid')

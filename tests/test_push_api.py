@@ -2,13 +2,18 @@ import pytest
 import responses
 from requests.exceptions import ConnectionError
 
-from appmetrica.push.api import API as PushAPI, TokenTypes
+from appmetrica.push.api import PushAPI, TokenTypes
 from appmetrica.push.exceptions import (AppMetricaCreateGroupError, AppMetricaSendPushError,
                                         AppMetricaCheckStatusError)
 
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
+
 
 @pytest.fixture
-def push_api():
+def api():
     yield PushAPI(app_id=123, access_token='123')
 
 
@@ -40,7 +45,7 @@ def ios_message():
 
 
 @responses.activate
-def test_create_group_success(push_api):
+def test_create_group_success(api):
     data = {
         'group': {
             'id': 9,
@@ -48,9 +53,9 @@ def test_create_group_success(push_api):
             'name': 'foobar'
         }
     }
-    responses.add(responses.POST, PushAPI.base_url + 'management/groups',
-                  status=200, json=data)
-    assert push_api.create_group('foobar') == 9
+    url = urljoin(PushAPI.base_url, 'management/groups')
+    responses.add(responses.POST, url, status=200, json=data)
+    assert api.create_group('foobar') == 9
 
 
 @pytest.mark.parametrize('params', [
@@ -58,40 +63,43 @@ def test_create_group_success(push_api):
     {'body': ConnectionError()},
 ])
 @responses.activate
-def test_create_group_error(params, push_api):
-    responses.add(responses.POST, PushAPI.base_url + 'management/groups', **params)
+def test_create_group_error(params, api):
+    url = urljoin(PushAPI.base_url, 'management/groups')
+    responses.add(responses.POST, url, **params)
     with pytest.raises(AppMetricaCreateGroupError):
-        push_api.create_group('foobar')
+        api.create_group('foobar')
 
 
 @responses.activate
-def test_send_push_success(push_api, devices, ios_message):
+def test_send_push_success(api, devices, ios_message):
     data = {
         'push_response': {
             'transfer_id': 1020
         }
     }
-    responses.add(responses.POST, PushAPI.base_url + 'send', status=200, json=data)
-    assert push_api.send_push(9, devices=devices, ios_message=ios_message) == 1020
-    assert push_api.send_push(10, devices=devices, android_message=ios_message) == 1020
+    url = urljoin(PushAPI.base_url, 'send')
+    responses.add(responses.POST, url, status=200, json=data)
+    assert api.send_push(9, devices=devices, ios_message=ios_message) == 1020
+    assert api.send_push(10, devices=devices, android_message=ios_message) == 1020
 
 
 @responses.activate
-def test_send_push_error(push_api, devices, ios_message):
-    responses.add(responses.POST, PushAPI.base_url + 'send', body=ConnectionError())
+def test_send_push_error(api, devices, ios_message):
+    url = urljoin(PushAPI.base_url, 'send')
+    responses.add(responses.POST, url, body=ConnectionError())
     with pytest.raises(AppMetricaSendPushError):
-        push_api.send_push(9, devices=devices, ios_message=ios_message)
+        api.send_push(9, devices=devices, ios_message=ios_message)
 
 
-def test_send_push_error_params(push_api, devices, ios_message):
+def test_send_push_error_params(api, devices, ios_message):
     with pytest.raises(AppMetricaSendPushError):
-        push_api.send_push(9, ios_message=ios_message)
+        api.send_push(9, ios_message=ios_message)
     with pytest.raises(AppMetricaSendPushError):
-        push_api.send_push(9, devices=devices)
+        api.send_push(9, devices=devices)
 
 
 @responses.activate
-def test_check_status_success(push_api):
+def test_check_status_success(api):
     data = {
         'transfer': {
             'id': 505,
@@ -99,8 +107,9 @@ def test_check_status_success(push_api):
             'errors': []
         }
     }
-    responses.add(responses.GET, PushAPI.base_url + 'status/505', status=200, json=data)
-    assert push_api.check_status(505) == 'sent'
+    url = urljoin(PushAPI.base_url, 'status/505')
+    responses.add(responses.GET, url, status=200, json=data)
+    assert api.check_status(505) == 'sent'
 
 
 @pytest.mark.parametrize('params', [
@@ -108,7 +117,8 @@ def test_check_status_success(push_api):
     {'status': 200, 'json': {'transfer': {'id': 2999, 'status': 'failed', 'errors': ['Error']}}},
 ])
 @responses.activate
-def test_check_status_error(push_api, params):
-    responses.add(responses.GET, PushAPI.base_url + 'status/2999', **params)
+def test_check_status_error(api, params):
+    url = urljoin(PushAPI.base_url, 'status/2999')
+    responses.add(responses.GET, url, **params)
     with pytest.raises(AppMetricaCheckStatusError):
-        push_api.check_status(2999)
+        api.check_status(2999)
