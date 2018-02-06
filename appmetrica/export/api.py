@@ -6,10 +6,10 @@ from appmetrica.export import exceptions
 logger = logging.getLogger(__name__)
 
 
-class API(BaseAPI):
+class ExportAPI(BaseAPI):
     base_url = 'https://api.appmetrica.yandex.ru/logs/v1/export/'
 
-    def push_tokens(self, *fields):
+    def export_push_tokens(self, *fields):
         """
         Download all push tokens registered in the application
         :param fields: list of requested fields
@@ -45,4 +45,4 @@ class API(BaseAPI):
             # Query is added to the queue
             raise exceptions.AppMetricaPrepareData
 
-        return super(API, self)._data_from_response(response)
+        return super(ExportAPI, self)._data_from_response(response)

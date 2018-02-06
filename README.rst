@@ -81,4 +81,4 @@ Export tokens
 
 2. Call push_tokens method with necessary fields::
 
-    data = api.push_tokens('token', 'ios_ifa', 'google_aid')
+    data = api.export_push_tokens('token', 'ios_ifa', 'google_aid')

@@ -16,7 +16,7 @@ class TokenTypes(object):
     IOS_PUSH_TOKEN = 'ios_push_token'
 
 
-class API(BaseAPI):
+class PushAPI(BaseAPI):
     base_url = 'https://push.api.appmetrica.yandex.net/push/v1/'
 
     def create_group(self, name):

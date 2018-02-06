@@ -2,25 +2,30 @@ import pytest
 import responses
 from requests.exceptions import ConnectionError
 
-from appmetrica.export.api import API as ExportAPI
+from appmetrica.export.api import ExportAPI
 from appmetrica.export.exceptions import AppMetricaPrepareData, AppMetricaExportPushTokenError
+
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
 
 
 @pytest.fixture
-def export_api():
+def api():
     yield ExportAPI(app_id=123, access_token='123')
 
 
 @responses.activate
-def test_get_push_tokens_success(export_api):
-    url = ExportAPI.base_url + 'push_tokens.json'
+def test_get_push_tokens_success(api):
+    url = urljoin(ExportAPI.base_url, 'push_tokens.json')
     responses.add(responses.GET, url, status=202, body='')
 
     # first preparation of data
     with pytest.raises(AppMetricaPrepareData):
-        assert export_api.push_tokens('token')
+        assert api.export_push_tokens('token')
 
-    # than return data
+    # then return data
     data = {
         'data': [
             {'token': 'D7BB4C4F8B3CF81488DEAAC8ABC1B955'},
@@ -28,7 +33,7 @@ def test_get_push_tokens_success(export_api):
         ]
     }
     responses.replace(responses.GET, url, status=200, json=data)
-    data = export_api.push_tokens('token')
+    data = api.export_push_tokens('token')
     assert len(data) == 2
     assert data[0]['token'] == 'D7BB4C4F8B3CF81488DEAAC8ABC1B955'
 
@@ -38,7 +43,8 @@ def test_get_push_tokens_success(export_api):
     {'body': ConnectionError()},
 ])
 @responses.activate
-def test_get_push_tokens_error(params, export_api):
-    responses.add(responses.GET, ExportAPI.base_url + 'push_tokens.json', **params)
+def test_get_push_tokens_error(params, api):
+    url = urljoin(ExportAPI.base_url, 'push_tokens.json')
+    responses.add(responses.GET, url, **params)
     with pytest.raises(AppMetricaExportPushTokenError):
-        export_api.push_tokens('token')
+        api.export_push_tokens('token')
