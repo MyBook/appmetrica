@@ -22,9 +22,9 @@ Send push
 
 1. Create `API` instance::
 
-    from appmetrica.push.api import API
+    from appmetrica.push.api import PushAPI
 
-    api = API(application_id, access_token)
+    api = PushAPI(application_id, access_token)
 
 2. Create group to combine the sending in the report::
 
@@ -75,9 +75,9 @@ Export tokens
 
 1. Create `API` instance::
 
-    from appmetrica.export.api import API
+    from appmetrica.export.api import ExportAPI
 
-    api = API(application_id, access_token)
+    api = ExportAPI(application_id, access_token)
 
 2. Call push_tokens method with necessary fields::
 
