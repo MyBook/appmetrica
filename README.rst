@@ -82,3 +82,20 @@ Export tokens
 2. Call push_tokens method with necessary fields::
 
     data = api.export_push_tokens('token', 'ios_ifa', 'google_aid')
+
+
+Export devices
+--------------
+
+1. Create `API` instance::
+
+    from appmetrica.export.api import ExportAPI
+
+    api = ExportAPI(application_id, access_token)
+
+2. Call push_tokens method with necessary fields::
+
+    date_till = datetime.now()
+    date_from = date_till - timedelta(days=7)
+
+    data = api.export_installations('ios_ifv', date_from=date_from, date_till=date_till)
