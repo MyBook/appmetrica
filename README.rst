@@ -70,6 +70,20 @@ Send push
     status = api.check_status(transfer_id)
 
 
+List of available groups
+------------------------
+
+1. Create `API` instance::
+
+    from appmetrica.push.api import PushAPI
+
+    api = PushAPI(application_id, access_token)
+
+2. Get list of groups
+
+    group_id = api.get_groups()
+
+
 Export tokens
 -------------
 

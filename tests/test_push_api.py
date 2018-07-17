@@ -4,7 +4,7 @@ from requests.exceptions import ConnectionError
 
 from appmetrica.push.api import PushAPI, TokenTypes
 from appmetrica.push.exceptions import (AppMetricaCreateGroupError, AppMetricaSendPushError,
-                                        AppMetricaCheckStatusError)
+                                        AppMetricaCheckStatusError, AppMetricaGetGroupsError)
 
 try:
     from urllib.parse import urljoin
@@ -68,6 +68,37 @@ def test_create_group_error(params, api):
     responses.add(responses.POST, url, **params)
     with pytest.raises(AppMetricaCreateGroupError):
         api.create_group('foobar')
+
+
+@responses.activate
+def test_get_groups_success(api):
+    groups = [
+        {
+            'id': 11,
+            'app_id': 123,
+            'name': 'foobar'
+        },
+        {
+            'id': 12,
+            'app_id': 123,
+            'name': 'alexbob'
+        }
+    ]
+    url = urljoin(PushAPI.base_url, 'management/groups')
+    responses.add(responses.GET, url, status=200, json={'groups': groups})
+    assert api.get_groups() == groups
+
+
+@pytest.mark.parametrize('params', [
+    {'status': 500},
+    {'body': ConnectionError()},
+])
+@responses.activate
+def test_get_groups_error(params, api):
+    url = urljoin(PushAPI.base_url, 'management/groups')
+    responses.add(responses.GET, url, **params)
+    with pytest.raises(AppMetricaGetGroupsError):
+        api.get_groups()
 
 
 @responses.activate
