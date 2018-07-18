@@ -6,6 +6,11 @@ class AppMetricaCreateGroupError(AppMetricaException):
     pass
 
 
+class AppMetricaGetGroupsError(AppMetricaException):
+    """Raised when yandex push api responds with an error that get group list"""
+    pass
+
+
 class AppMetricaSendPushError(AppMetricaException):
     """Raised when yandex push api responds with an error that sending a push"""
     pass

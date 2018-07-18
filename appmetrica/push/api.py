@@ -48,6 +48,34 @@ class PushAPI(BaseAPI):
         # }
         return response_data['group']['id']
 
+    def get_groups(self):
+        """
+        List of all available groups
+        :return: List of dict with groups metadata
+        """
+        try:
+            response_data = self._request('get', 'management/groups', params={'app_id': self.app_id})
+        except Exception as exc:
+            logger.error('get_groups request failed due to %s', exc, exc_info=True)
+            raise exceptions.AppMetricaGetGroupsError
+
+        # response_data contains dict like:
+        # {
+        #   "groups": [
+        #     {
+        #       "id": 1,
+        #       "app_id": 3,
+        #       "name": "name of group"
+        #     },
+        #     {
+        #       "id": 2,
+        #       "app_id": 3,
+        #       "name": "name of other group"
+        #     }
+        #   ]
+        # }
+        return response_data['groups']
+
     def send_push(self, group_id, devices=None, ios_message=None, android_message=None, tag=None):
         """
         Sends push messages to the specified devices
