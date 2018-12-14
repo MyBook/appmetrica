@@ -108,7 +108,7 @@ def test_send_push_success(api, devices, ios_message):
             'transfer_id': 1020
         }
     }
-    url = urljoin(PushAPI.base_url, 'send')
+    url = urljoin(PushAPI.base_url, 'send-batch')
     responses.add(responses.POST, url, status=200, json=data)
     assert api.send_push(9, devices=devices, ios_message=ios_message) == 1020
     assert api.send_push(10, devices=devices, android_message=ios_message) == 1020
@@ -116,7 +116,7 @@ def test_send_push_success(api, devices, ios_message):
 
 @responses.activate
 def test_send_push_error(api, devices, ios_message):
-    url = urljoin(PushAPI.base_url, 'send')
+    url = urljoin(PushAPI.base_url, 'send-batch')
     responses.add(responses.POST, url, body=ConnectionError())
     with pytest.raises(AppMetricaSendPushError):
         api.send_push(9, devices=devices, ios_message=ios_message)

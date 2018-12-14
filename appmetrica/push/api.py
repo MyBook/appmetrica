@@ -7,6 +7,9 @@ from appmetrica.push import exceptions
 
 logger = logging.getLogger(__name__)
 
+MAX_NUMBER_IN_BATCH = 250000
+MAX_NUMBER_OF_GROUPS = 5
+
 
 class TokenTypes(object):
     APPMETRICA_DEVICE_ID = 'appmetrica_device_id'
@@ -115,6 +118,12 @@ class PushAPI(BaseAPI):
         if not ios_message and not android_message:
             logger.error('send push error: messages are not provided')
             raise exceptions.AppMetricaSendPushError('messages are not provided')
+        if len(devices) > MAX_NUMBER_OF_GROUPS:
+            logger.error('send push error: too many devices groups')
+            raise exceptions.AppMetricaSendPushError('too many devices groups')
+        if sum(len(d['id_values']) for d in devices) > MAX_NUMBER_IN_BATCH:
+            logger.error('send push error: too many devices')
+            raise exceptions.AppMetricaSendPushError('too many devices')
 
         messages = {}
         if ios_message:
@@ -124,15 +133,17 @@ class PushAPI(BaseAPI):
 
         tag = tag or datetime.datetime.now().isoformat()  # default tag
         data = {
-            'push_request': {
+            'push_batch_request': {
                 'group_id': group_id,
                 'tag': tag,
-                'messages': messages,
-                'devices': devices,
+                'batch': [{
+                    'messages': messages,
+                    'devices': devices
+                }]
             }
         }
         try:
-            response_data = self._request('post', 'send', json=data)
+            response_data = self._request('post', 'send-batch', json=data)
         except Exception as exc:
             logger.error('send_push request with json %s failed due to %s', data, exc, exc_info=True)
             raise exceptions.AppMetricaSendPushError
