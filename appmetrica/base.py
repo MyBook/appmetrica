@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class BaseAPI(object):
     base_url = None
-    request_timeout = 5
+    request_timeout = 30
     access_token = None
     app_id = None
 
