@@ -113,3 +113,24 @@ Export devices
     date_from = date_till - timedelta(days=7)
 
     data = api.export_installations('ios_ifv', date_from=date_from, date_till=date_till)
+
+
+
+Publish a release on PyPi
+-------------------------
+
+Install `twine <https://pypi.org/project/twine/>`_ globally::
+
+  pip install twine
+
+1. Don't forget to bump the package version::
+
+    __version__ = '1.0.2'
+
+2. Build the release::
+
+    python setup.py sdist
+
+3. Publish the release on PyPi::
+
+    twine upload dist/litresapi-1.0.1.tar.gz
