@@ -125,7 +125,7 @@ Install `twine <https://pypi.org/project/twine/>`_ globally::
 
 1. Don't forget to bump the package version::
 
-    __version__ = '1.0.2'
+    __version__ = '1.0.3'
 
 2. Build the release::
 
@@ -133,4 +133,4 @@ Install `twine <https://pypi.org/project/twine/>`_ globally::
 
 3. Publish the release on PyPi::
 
-    twine upload dist/litresapi-1.0.1.tar.gz
+    twine upload dist/appmetrica-1.0.3.tar.gz
