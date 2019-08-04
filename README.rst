@@ -129,7 +129,7 @@ Install `twine <https://pypi.org/project/twine/>`_ globally::
 
 2. Build the release::
 
-    python setup.py sdist
+    python setup.py sdist bdist_wheel
 
 3. Publish the release on PyPi::
 
