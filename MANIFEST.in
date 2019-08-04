@@ -1,5 +1,5 @@
 include *.rst
-recursive-include appmetrica
+recursive-include appmetrica *.py
 recursive-include tests *.py
 include tox.ini
 
