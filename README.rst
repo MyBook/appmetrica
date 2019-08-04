@@ -133,4 +133,4 @@ Install `twine <https://pypi.org/project/twine/>`_ globally::
 
 3. Publish the release on PyPi::
 
-    twine upload dist/appmetrica-1.0.3.tar.gz
+    twine upload dist/*
