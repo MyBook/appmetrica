@@ -210,6 +210,36 @@ def test_send_success(api, devices, messages_batch):
 
 
 @responses.activate
+@pytest.mark.parametrize('bad_data', [
+    {'push_batch_request': {}},  # group_id is required
+    {'push_batch_request': {'group_id': 1, 'tag': '1', 'batch': []}},  # batch can't be empty
+    {'push_batch_request': {'group_id': 1, 'tag': '1', 'batch': [{'messages': {}}]}},  # bad format
+    # too many device groups
+    {'push_batch_request': {'group_id': 1, 'tag': '1', 'batch': [
+        {'messages': {},
+         'devices': [{'id_type': TokenTypes.APPMETRICA_DEVICE_ID, 'id_values': ['123456789']} for i in range(6)]}
+    ]}},
+    # to many devices
+    {'push_batch_request': {'group_id': 1, 'tag': '1', 'batch': [
+        {'messages': {},
+         'devices': [{'id_type': TokenTypes.ANDROID_PUSH_TOKEN, 'id_values': [str(i) for i in range(200000)]},
+                     {'id_type': TokenTypes.IOS_PUSH_TOKEN, 'id_values': [str(i) for i in range(150001)]}]}
+    ]}},
+])
+def test_send_error(api, devices, bad_data):
+    data = {
+        'push_response': {
+            'transfer_id': 1020
+        }
+    }
+    url = urljoin(PushAPI.base_url, 'send-batch')
+    responses.add(responses.POST, url, status=200, json=data)
+
+    with pytest.raises(AppMetricaSendPushError):
+        api.send(bad_data)
+
+
+@responses.activate
 def test_send_push_success(api, devices, ios_message):
     data = {
         'push_response': {

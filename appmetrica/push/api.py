@@ -240,7 +240,7 @@ class PushAPI(BaseAPI):
                 if len(device_groups) > MAX_NUMBER_OF_GROUPS:
                     logger.error('send push error: too many devices groups')
                     raise exceptions.AppMetricaSendPushError('too many devices groups')
-                num_devices += len([devices['id_values'] for devices in device_groups])
+                num_devices += sum([len(devices['id_values']) for devices in device_groups])
             if num_devices > MAX_NUMBER_IN_BATCH:
                 logger.error('send push error: too many devices')
                 raise exceptions.AppMetricaSendPushError('too many devices')
