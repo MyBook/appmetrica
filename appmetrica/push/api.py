@@ -1,7 +1,8 @@
 # coding: utf-8
+import datetime
 import json
 import logging
-import datetime
+
 from appmetrica.base import BaseAPI
 from appmetrica.push import exceptions
 
@@ -118,12 +119,6 @@ class PushAPI(BaseAPI):
         if not ios_message and not android_message:
             logger.error('send push error: messages are not provided')
             raise exceptions.AppMetricaSendPushError('messages are not provided')
-        if len(devices) > MAX_NUMBER_OF_GROUPS:
-            logger.error('send push error: too many devices groups')
-            raise exceptions.AppMetricaSendPushError('too many devices groups')
-        if sum(len(d['id_values']) for d in devices) > MAX_NUMBER_IN_BATCH:
-            logger.error('send push error: too many devices')
-            raise exceptions.AppMetricaSendPushError('too many devices')
 
         messages = {}
         if ios_message:
@@ -142,18 +137,21 @@ class PushAPI(BaseAPI):
                 }]
             }
         }
+        return self.send(data)
+
+    def send(self, data):
+        """
+        Send batch of push messages
+
+        :param data: dict with data, see https://appmetrica.yandex.ru/docs/mobile-api/push/post-send-batch.html
+        :return: Identifier of the sending push (transfer_id)
+        """
+        self._validate(data)
         try:
             response_data = self._request('post', 'send-batch', json=data)
         except Exception as exc:
             logger.error('send_push request with json %s failed due to %s', data, exc, exc_info=True)
             raise exceptions.AppMetricaSendPushError
-
-        # response_data contain dict like:
-        # {
-        #   "push_response": {
-        #     "transfer_id": XXXXXX
-        #   }
-        # }
         return response_data['push_response']['transfer_id']
 
     def check_status(self, transfer_id):
@@ -223,3 +221,28 @@ class PushAPI(BaseAPI):
             "silent": silent,
             "content": content,
         }
+
+    def _validate(self, data):
+        required_fileds = ['group_id', 'tag', 'batch']
+        for field in required_fileds:
+            if field not in data['push_batch_request']:
+                raise exceptions.AppMetricaSendPushError('field %s is required' % field)
+
+        batch = data['push_batch_request']['batch']
+        if not batch:
+            logger.error('send push error: batch cant be empty')
+            raise exceptions.AppMetricaSendPushError('batch cant be empty')
+
+        try:
+            num_devices = 0
+            for messages in batch:
+                device_groups = messages['devices']
+                if len(device_groups) > MAX_NUMBER_OF_GROUPS:
+                    logger.error('send push error: too many devices groups')
+                    raise exceptions.AppMetricaSendPushError('too many devices groups')
+                num_devices += len([devices['id_values'] for devices in device_groups])
+            if num_devices > MAX_NUMBER_IN_BATCH:
+                logger.error('send push error: too many devices')
+                raise exceptions.AppMetricaSendPushError('too many devices')
+        except KeyError:
+            raise exceptions.AppMetricaSendPushError('invalid format of data')
