@@ -36,6 +36,102 @@ def devices():
 
 
 @pytest.fixture
+def messages_batch():
+    yield {
+        'push_batch_request': {
+            'group_id': 1,
+            'client_transfer_id': 123,
+            'tag': '123',
+            'batch': [
+                {
+                    'messages': {
+                        'android': {
+                            'silent': False,
+                            'content': {
+                                'title': 'Title',
+                                'text': 'Text',
+                                'icon': 'icon',
+                                'icon_background': '#AARRGGBB',
+                                'image': 'https://example.com/picture.jpg',
+                                'banner': 'https://example.com/picture.jpg',
+                                'data': 'extra data',
+                                'channel_id': '123',
+                                'priority': -2,
+                                'collapse_key': 2001,
+                                'vibration': [0, 500],
+                                'led_color': '#RRGGBB',
+                                'led_interval': 50,
+                                'led_pause_interval': 50,
+                                'time_to_live': 180
+                            },
+                            'open_action': {
+                                'deeplink': 'yandexmaps://?'
+                            }
+                        },
+                        'iOS': {
+                            'silent': False,
+                            'content': {
+                                'title': 'Title',
+                                'text': 'Text',
+                                'badge': 1,
+                                'sound': 'disable',
+                                'thread_id': '123',
+                                'category': '123',
+                                'mutable_content': 1,
+                                'expiration': 3600,
+                                'data': 'extra data',
+                                'collapse_id': '123'
+                            },
+                            'open_action': {
+                                'url': 'https://ya.ru'
+                            }
+                        }
+                    },
+                    'devices': [
+                        {
+                            'id_type': TokenTypes.APPMETRICA_DEVICE_ID,
+                            'id_values': ['123456789', '42']
+                        },
+                        {
+                            'id_type': TokenTypes.IOS_IFA,
+                            'id_values': ['8A690667-6204-4A6A-9B38-85DE016.....']
+                        },
+                        {
+                            'id_type': TokenTypes.GOOGLE_AID,
+                            'id_values': ['eb5f3ec8-2e3e-492f-b15b-d21860b.....']
+                        },
+                        {
+                            'id_type': TokenTypes.ANDROID_PUSH_TOKEN,
+                            'id_values': ['eFfxdO7uCMw:APA91bF1tN3X3BAbiJXsQhk-...']
+                        },
+                        {
+                            'id_type': TokenTypes.IOS_PUSH_TOKEN,
+                            'id_values': ['F6A79E9F844A24C5FBED5C58A4C71561C180F.........']
+                        }
+                    ]
+                },
+                {
+                    'messages': {
+                        'android': {
+                            'content': {
+                                'title': 'Title',
+                                'text': 'Text',
+                            },
+                        }
+                    },
+                    'devices': [
+                        {
+                            'id_type': TokenTypes.GOOGLE_AID,
+                            'id_values': ['eb5f3ec8-2e3e-492f-b15b-d21860b.....']
+                        },
+                    ]
+                }
+            ]
+        }
+    }
+
+
+@pytest.fixture
 def ios_message():
     yield PushAPI.build_ios_message(
         title='Subject',
@@ -99,6 +195,48 @@ def test_get_groups_error(params, api):
     responses.add(responses.GET, url, **params)
     with pytest.raises(AppMetricaGetGroupsError):
         api.get_groups()
+
+
+@responses.activate
+def test_send_success(api, devices, messages_batch):
+    data = {
+        'push_response': {
+            'transfer_id': 1020
+        }
+    }
+    url = urljoin(PushAPI.base_url, 'send-batch')
+    responses.add(responses.POST, url, status=200, json=data)
+    assert api.send(messages_batch) == 1020
+
+
+@responses.activate
+@pytest.mark.parametrize('bad_data', [
+    {'push_batch_request': {}},  # group_id is required
+    {'push_batch_request': {'group_id': 1, 'tag': '1', 'batch': []}},  # batch can't be empty
+    {'push_batch_request': {'group_id': 1, 'tag': '1', 'batch': [{'messages': {}}]}},  # bad format
+    # too many device groups
+    {'push_batch_request': {'group_id': 1, 'tag': '1', 'batch': [
+        {'messages': {},
+         'devices': [{'id_type': TokenTypes.APPMETRICA_DEVICE_ID, 'id_values': ['123456789']} for i in range(6)]}
+    ]}},
+    # to many devices
+    {'push_batch_request': {'group_id': 1, 'tag': '1', 'batch': [
+        {'messages': {},
+         'devices': [{'id_type': TokenTypes.ANDROID_PUSH_TOKEN, 'id_values': [str(i) for i in range(200000)]},
+                     {'id_type': TokenTypes.IOS_PUSH_TOKEN, 'id_values': [str(i) for i in range(150001)]}]}
+    ]}},
+])
+def test_send_error(api, devices, bad_data):
+    data = {
+        'push_response': {
+            'transfer_id': 1020
+        }
+    }
+    url = urljoin(PushAPI.base_url, 'send-batch')
+    responses.add(responses.POST, url, status=200, json=data)
+
+    with pytest.raises(AppMetricaSendPushError):
+        api.send(bad_data)
 
 
 @responses.activate
