@@ -27,7 +27,7 @@ class BaseAPI(object):
 
         try:
             response = requests.request(method, url, params=params, json=json,
-                                        headers=headers, timeout=self.request_timeout)
+                                        headers=headers, timeout=self.request_timeout, verify=False)
         except Exception as exc:
             logger.error('failed to request %s %s with headers=%s, params=%s json=%s due to %s',
                          method, url, headers, params, json, exc,
