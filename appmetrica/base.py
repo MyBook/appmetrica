@@ -1,6 +1,9 @@
 # coding: utf-8
 import logging
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
+
 from appmetrica.exceptions import AppMetricaRequestError
 
 logger = logging.getLogger(__name__)
@@ -25,9 +28,17 @@ class BaseAPI(object):
 
         url = '{base_url}/{endpoint}'.format(base_url=self.base_url.rstrip('/'), endpoint=endpoint)
 
+        session = requests.Session()
+        number_of_retries = 3
+        retry_strategy = Retry(connect=number_of_retries,
+                               method_whitelist=['GET', 'POST'],
+                               backoff_factor=2)   # 1s, 2s, 4s
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        session.mount('https://', adapter)
+
         try:
-            response = requests.request(method, url, params=params, json=json,
-                                        headers=headers, timeout=self.request_timeout)
+            response = session.request(method, url, params=params, json=json,
+                                       headers=headers, timeout=self.request_timeout)
         except Exception as exc:
             logger.error('failed to request %s %s with headers=%s, params=%s json=%s due to %s',
                          method, url, headers, params, json, exc,
