@@ -28,23 +28,23 @@ class BaseAPI(object):
 
         url = '{base_url}/{endpoint}'.format(base_url=self.base_url.rstrip('/'), endpoint=endpoint)
 
-        session = requests.Session()
-        number_of_retries = 3
-        retry_strategy = Retry(connect=number_of_retries,
-                               method_whitelist=['GET', 'POST'],
-                               backoff_factor=2)   # 1s, 2s, 4s
-        adapter = HTTPAdapter(max_retries=retry_strategy)
-        session.mount('https://', adapter)
+        with requests.Session() as session:
+            number_of_retries = 3
+            retry_strategy = Retry(connect=number_of_retries,
+                                   method_whitelist=['GET', 'POST'],
+                                   backoff_factor=2)   # 1s, 2s, 4s
+            adapter = HTTPAdapter(max_retries=retry_strategy)
+            session.mount('https://', adapter)
 
-        try:
-            response = session.request(method, url, params=params, json=json,
-                                       headers=headers, timeout=self.request_timeout)
-        except Exception as exc:
-            logger.error('failed to request %s %s with headers=%s, params=%s json=%s due to %s',
-                         method, url, headers, params, json, exc,
-                         exc_info=True,
-                         extra={'data': {'json': json, 'params': params}})
-            raise AppMetricaRequestError
+            try:
+                response = session.request(method, url, params=params, json=json,
+                                           headers=headers, timeout=self.request_timeout)
+            except Exception as exc:
+                logger.error('failed to request %s %s with headers=%s, params=%s json=%s due to %s',
+                             method, url, headers, params, json, exc,
+                             exc_info=True,
+                             extra={'data': {'json': json, 'params': params}})
+                raise AppMetricaRequestError
 
         if not (200 <= response.status_code < 300):
             logger.error('failed to request %s %s with headers=%s, params=%s json=%s due to %s',
