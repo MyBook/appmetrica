@@ -125,7 +125,7 @@ Install `twine <https://pypi.org/project/twine/>`_ globally::
 
 1. Don't forget to bump the package version::
 
-    __version__ = '1.0.3'
+    __version__ = '1.0.5'
 
 2. Build the release::
 
