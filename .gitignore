@@ -24,6 +24,7 @@ pip-log.txt
 .tox
 nosetests.xml
 htmlcov
+.pytest_cache/
 
 # IDEs
 .cache/

@@ -23,23 +23,28 @@ class TokenTypes(object):
 class PushAPI(BaseAPI):
     base_url = 'https://push.api.appmetrica.yandex.net/push/v1/'
 
-    def create_group(self, name):
+    def create_group(self, name, send_rate=None):
         """
         Create group to combine the sending in the report
         :param name: Unique name of the group
+        :param send_rate: Limit on the max speed of sending push messages (number per second)
         :return: Identifier of the created group
         """
         assert name
-        data = {
-            'group': {
-                'app_id': self.app_id,
-                'name': name
-            }
+        group = {
+            'app_id': self.app_id,
+            'name': name,
         }
+        if send_rate is not None:
+            if not (100 <= send_rate <= 5000):
+                logger.error('create_group with send_rate = %s failed. possible values from 100 to 5000', send_rate)
+                raise exceptions.AppMetricaCreateGroupError
+            group['send_rate'] = send_rate
+
         try:
-            response_data = self._request('post', 'management/groups', json=data)
+            response_data = self._request('post', 'management/groups', json={'group': group})
         except Exception as exc:
-            logger.error('create_group request with json %s failed due to %s', data, exc, exc_info=True)
+            logger.error('create_group request with json %s failed due to %s', group, exc, exc_info=True)
             raise exceptions.AppMetricaCreateGroupError
 
         # response_data contains dict like:
@@ -47,7 +52,8 @@ class PushAPI(BaseAPI):
         #   "group": {
         #     "id": XXXXXX,
         #     "app_id": XXXXXX,
-        #     "name": "the_name_of_the_group"
+        #     "name": "the_name_of_the_group",
+        #     "send_rate": 5000,
         #   }
         # }
         return response_data['group']['id']
