@@ -1,3 +1,4 @@
+import json
 import pytest
 import responses
 from requests.exceptions import ConnectionError
@@ -146,12 +147,26 @@ def test_create_group_success(api):
         'group': {
             'id': 9,
             'app_id': 123,
-            'name': 'foobar'
+            'name': 'foobar',
+            'send_rate': 100,
         }
     }
     url = urljoin(PushAPI.base_url, 'management/groups')
-    responses.add(responses.POST, url, status=200, json=data)
-    assert api.create_group('foobar') == 9
+    with responses.RequestsMock(assert_all_requests_are_fired=True) as resp_mock:
+        resp_mock.add(responses.POST, url, status=200, json=data)
+        assert api.create_group('foobar', send_rate=200) == 9
+        assert json.loads(resp_mock.calls[0].request.body) == {
+            'group': {'app_id': 123, 'name': 'foobar', 'send_rate': 200}
+        }
+
+
+@pytest.mark.parametrize('send_rate', [-200, 0, 5, 7000])
+@responses.activate
+def test_create_group_error_send_rate(send_rate, api):
+    url = urljoin(PushAPI.base_url, 'management/groups')
+    responses.add(responses.POST, url, status=400)
+    with pytest.raises(AppMetricaCreateGroupError):
+        api.create_group('foobar', send_rate=send_rate)
 
 
 @pytest.mark.parametrize('params', [

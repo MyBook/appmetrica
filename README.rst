@@ -28,7 +28,7 @@ Send push
 
 2. Create group to combine the sending in the report::
 
-    group_id = api.create_group('test-push-1')
+    group_id = api.create_group('test-push-1', send_rate=500)
 
 3. Pass `group_id`, `device list` and `message` to send_push method and call::
 
