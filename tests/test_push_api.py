@@ -155,7 +155,7 @@ def test_create_group_success(api):
     with responses.RequestsMock(assert_all_requests_are_fired=True) as resp_mock:
         resp_mock.add(responses.POST, url, status=200, json=data)
         assert api.create_group('foobar', send_rate=200) == 9
-        assert json.loads(resp_mock.calls[0].request.body) == {
+        assert json.loads(resp_mock.calls[0].request.body.decode()) == {
             'group': {'app_id': 123, 'name': 'foobar', 'send_rate': 200}
         }
 
