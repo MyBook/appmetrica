@@ -13,7 +13,8 @@ class StatAPI(BaseAPI):
 
     def export_stat(self, params):
         """
-        Download all push tokens registered in the application
+        Download stat reports https://appmetrica.yandex.ru/docs/mobile-api/api_v1/data.html
+
         :param params: dict with query params
         :return: dict with stat data
         """

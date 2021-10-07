@@ -16,12 +16,17 @@ def api():
 
 @responses.activate
 def test_get_stat_data(api):
-    query = {
-        'ids': 123,
-        'metrics': ['ym:pc:users'],
-    },
+    query = {'ids': 123, 'metrics': ['ym:pc:users']},
     data = {
-        'data': [{'total_rows': 999, 'query': query, 'metrics': 12345}]
+        'total_rows': 999,
+        'query': query,
+        'data': [{
+            'dimensions': [{
+                'key_1': 'foo',
+                'key_2': 'bar',
+            }],
+            'metrics': [998, 999]
+        }]
     }
     url = urljoin(StatAPI.base_url, 'data')
     with responses.RequestsMock(assert_all_requests_are_fired=True) as resp_mock:
